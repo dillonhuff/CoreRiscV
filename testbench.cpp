@@ -66,6 +66,7 @@ void processTop(const std::string& fileName,
         "removeconstduplicates",
         "cullzexts",
         "clockifyinterface",
+        "deletedeadinstances",
         "packconnections"});
 
   cout << "Flattened core" << endl;
