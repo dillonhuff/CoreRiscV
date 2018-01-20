@@ -31,7 +31,19 @@ void processTop(const std::string& fileName,
         "removeconstduplicates",
         "packconnections"});
 
-  cout << "Flattened file" << endl;
+  cout << "Flattened core" << endl;
+  cout << "# of instances in " topMod->getName() << " = " << topMod->getDef()->getInstances().size() << endl;
+
+  if (!saveToFile(c->getGlobal(), "risc5Processed.json", topMod)) {
+    cout << "Could not save to json!!" << endl;
+    c->die();
+  }
+
+  cout << "Saved to file" << endl;
+
+  SimulatorState state(topMod);
+
+  cout << "Got simulator state for top module" << endl;
   
   deleteContext(c);
 }
