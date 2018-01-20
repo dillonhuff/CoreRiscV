@@ -82,7 +82,7 @@ void processTop(const std::string& fileName,
   SimulatorState state(topMod);
   state.setMainClock("self.clk");
 
-  cout << "Got simulator state for top module" << endl;  
+  cout << "Got simulator state for top module" << endl;
 
   state.setClock("self.clk", 0, 1);
 
