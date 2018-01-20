@@ -69,6 +69,8 @@ void processTop(const std::string& fileName,
         "deletedeadinstances",
         "packconnections"});
 
+  foldConstants(topMod);
+
   cout << "Flattened core" << endl;
   cout << "# of instances in " << topMod->getName() << " = " << topMod->getDef()->getInstances().size() << endl;
 

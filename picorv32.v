@@ -2108,7 +2108,7 @@ module picorv32_regs (
 	output [31:0] rdata1,
 	output [31:0] rdata2
 );
-	reg [31:0] regs [0:30];
+	reg [31:0] regs [0:31];
 
 	always @(posedge clk)
 		if (wen) regs[~waddr[4:0]] <= wdata;
