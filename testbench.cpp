@@ -107,8 +107,52 @@ void processTop(const std::string& fileName,
   deleteContext(c);
 }
 
+void simulateState(const std::string& fileName,
+                   const std::string& topModName) {
+  Context* c = newContext();
+
+  CoreIRLoadLibrary_rtlil(c);
+
+  Module* topMod = nullptr;
+
+  if (!loadFromFile(c, fileName, &topMod)) {
+    cout << "Could not Load from json!!" << endl;
+    c->die();
+  }
+
+  topMod = c->getGlobal()->getModule(topModName);
+  c->setTop(topMod);
+
+  SimulatorState state(topMod);
+  state.setMainClock("self.clk");
+
+  cout << "Got simulator state for top module" << endl;
+
+  state.setClock("self.clk", 0, 1);
+
+  state.setClock("self.pcpi_wr", 0, 0);
+
+  state.setValue("self.irq", BitVec(32, 0));
+  state.setValue("self.mem_rdata", BitVec(32, 0));
+  state.setValue("self.mem_ready", BitVec(1, 0));
+
+  state.setValue("self.pcpi_rd", BitVec(32, 0));
+  state.setValue("self.pcpi_ready", BitVec(1, 0));
+  state.setValue("self.pcpi_wait", BitVec(1, 0));
+  state.setValue("self.resetn", BitVec(1, 0));
+  
+  cout << "Executing core" << endl;
+
+  state.execute();
+  state.execute();
+  
+  deleteContext(c);
+
+}
+
 int main() {
   string fileName = "picorv32.json";//"__DOLLAR__paramod__DOLLAR__4d2dfdcc1db1a7362453fb449ccdda75bb1b39f9__BACKSLASH__picorv32.json";
   string topMod = "picorv32"; //"__DOLLAR__paramod__DOLLAR__4d2dfdcc1db1a7362453fb449ccdda75bb1b39f9__BACKSLASH__picorv32";
-  processTop(fileName, topMod);
+  //processTop(fileName, topMod);
+  simulateState("risc5Processed.json", topMod);
 }
