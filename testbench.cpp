@@ -107,17 +107,6 @@ void processTop(const std::string& fileName,
   deleteContext(c);
 }
 
-	// reg [31:0] memory [0:255];
-
-	// initial begin
-	// 	memory[0] = 32'h 
-	// 	memory[1] = 32'h 0000a023; //       sw      x0,0(x1)
-	// 	memory[2] = 32'h 0000a103; // loop: lw      x2,0(x1)
-	// 	memory[3] = 32'h 00110113; //       addi    x2,x2,1
-	// 	memory[4] = 32'h 0020a023; //       sw      x2,0(x1)
-	// 	memory[5] = 32'h ff5ff06f; //       j       <loop>
-	// end
-
 	// always @(posedge clk) begin
 	// 	mem_ready <= 0;
 	// 	if (mem_valid && !mem_ready) begin
@@ -234,13 +223,32 @@ void simulateState(const std::string& fileName,
         int mem_addr = state.getBitVec("self.mem_addr").to_type<int>() >> 2;
         cout << "Loading " << mem_addr << endl;
         state.setValue("self.mem_rdata", memory[mem_addr]);
+
+        BitVector mem_wstrb = state.getBitVec("self.mem_wstrb");
+        
+        assert(mem_wstrb.bitLength() == 4);
+
+        if (mem_wstrb.get(0)) {
+          //memory[mem_addr][ 7: 0] <= mem_wdata[ 7: 0];
+          BitVec mem = memory[mem_addr];
+        }
+        if (mem_wstrb.get(1)) {
+          //memory[mem_addr][15: 8] <= mem_wdata[15: 8];
+        }
+        if (mem_wstrb.get(2)) {
+          //memory[mem_addr][23:16] <= mem_wdata[23:16];
+        }
+        if (mem_wstrb.get(3)) {
+          //memory[mem_addr][31:24] <= mem_wdata[31:24];
+        }
+        
       } else {
         state.setValue("self.mem_ready", BitVec(1, 0));
       }
     } else {
       state.setValue("self.mem_ready", BitVec(1, 0));
     }
-    //state.execute();
+
   }
   
   deleteContext(c);
