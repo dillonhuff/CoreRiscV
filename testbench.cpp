@@ -268,23 +268,28 @@ void simulateState(const std::string& fileName,
       state.setValue("self.mem_ready", BitVec(1, 0));
     }
 
+    auto mem_addr = state.getBitVec("self.mem_addr");
+    auto mem_rdata = state.getBitVec("self.mem_rdata");
+    auto mem_wdata = state.getBitVec("self.mem_wdata");
+    auto mem_wstrb = state.getBitVec("self.mem_wstrb");
+    
     if ((state.getBitVec("self.mem_valid") == BitVec(1, 1)) &&
         (state.getBitVec("self.mem_ready") == BitVec(1, 1))) {
       
       if (state.getBitVec("self.mem_instr") == BitVec(1, 1)) {
-        //$display("ifetch 0x%08x: 0x%08x", mem_addr, mem_rdata);
-        cout << "ifetch " << state.getBitVec("self.mem_addr") << ": " <<
-          state.getBitVec("self.mem_rdata") << endl;
-      } else if (state.getBitVec("self.mem_wstrb") != BitVec(4, 0)) {
-        cout << "write  " << state.getBitVec("self.mem_addr") << ": " <<
-          state.getBitVec("self.mem_wdata") << " (wstrb=" <<
-          state.getBitVec("self.mem_wstrb") << ")" << endl;
 
-        //$displ"write  0x%08x: 0x%08x (wstrb=%b)", mem_addr, mem_wdata, mem_wstrb);
+        cout << "ifetch 0x" << mem_addr << ": " <<
+          mem_rdata << endl;
+      } else if (state.getBitVec("self.mem_wstrb") != BitVec(4, 0)) {
+
+        cout << "write  0x" << mem_addr << ": " <<
+          mem_wdata << " (wstrb=" <<
+          mem_wstrb << ")" << endl;
+
       } else {
-        //$display("read   0x%08x: 0x%08x", mem_addr, mem_rdata);
-        cout << "read   " << state.getBitVec("self.mem_addr") << ": " <<
-          state.getBitVec("self.mem_rdata") << endl;
+
+        cout << "read   0x" << mem_addr << ": " <<
+          mem_rdata << endl;
       }
 
     }
