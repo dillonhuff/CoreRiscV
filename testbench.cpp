@@ -183,7 +183,7 @@ void simulateState(const std::string& fileName,
 
   cout << "Executing core" << endl;
 
-  uint nclks = 200;
+  uint nclks = 300;
   for (uint i = 0; i < nclks; i++) {
 
     //state.runHalfCycle();
@@ -278,18 +278,22 @@ void simulateState(const std::string& fileName,
       
       if (state.getBitVec("self.mem_instr") == BitVec(1, 1)) {
 
-        cout << "ifetch 0x" << mem_addr << ": " <<
-          mem_rdata << endl;
+        printf( "ifetch 0x%08x: 0x%08x\n", mem_addr.to_type<int>(), mem_rdata.to_type<int>());
+        //cout << "ifetch " << std::setw(sizeof(int)*2) << std::hex << showbase << internal << setfill('0') << mem_addr.to_type<int>() << ": " <<
+        //mem_rdata.to_type<int>() << endl;
       } else if (state.getBitVec("self.mem_wstrb") != BitVec(4, 0)) {
 
-        cout << "write  0x" << mem_addr << ": " <<
-          mem_wdata << " (wstrb=" <<
-          mem_wstrb << ")" << endl;
+        printf( "write  0x%08x: 0x%08x (wstrb=", mem_addr.to_type<int>(), mem_wdata.to_type<int>());
+        cout << mem_wstrb << ")\n";
+        // cout << "write  " << std::hex << mem_addr.to_type<int>() << ": " <<
+        //   mem_wdata.to_type<int>() << " (wstrb=" <<
+        //   mem_wstrb << ")" << endl;
 
       } else {
 
-        cout << "read   0x" << mem_addr << ": " <<
-          mem_rdata << endl;
+        printf( "read   0x%08x: 0x%08x\n", mem_addr.to_type<int>(), mem_rdata.to_type<int>());
+        // cout << "read   " << std::hex << mem_addr.to_type<int>() << ": " <<
+        //   mem_rdata.to_type<int>() << endl;
       }
 
     }
