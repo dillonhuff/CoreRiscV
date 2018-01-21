@@ -128,16 +128,16 @@ void simulateState(const std::string& fileName,
 
   cout << "Got simulator state for top module" << endl;
 
-  state.setClock("self.clk", 0, 0);
+  state.setClock("self.clk", 0, 1);
   state.setValue("self.mem_rdata", BitVec(32, 0));
   state.setValue("self.mem_ready", BitVec(1, 0));
-  state.setValue("self.resetn", BitVec(1, 1));
+  state.setValue("self.resetn", BitVec(1, 0));
 
   // Do these pcpi commands matter if we are not using a coprocessor?
   state.setClock("self.pcpi_wr", 0, 0);
   state.setValue("self.pcpi_rd", BitVec(32, 0));
-  state.setValue("self.pcpi_ready", BitVec(1, 0));
-  state.setValue("self.pcpi_wait", BitVec(1, 1));
+  state.setValue("self.pcpi_ready", BitVec(1, 1));
+  state.setValue("self.pcpi_wait", BitVec(1, 0));
 
   // Also not sure if irq matters
   //state.setValue("self.irq", BitVec(32, 0));
@@ -145,19 +145,28 @@ void simulateState(const std::string& fileName,
   cout << "Initializing" << endl;
 
   state.execute();
-  state.execute();
+
+  auto registers = state.getCircStates().back().registers;
+
+  cout << "# of assigned registers = " << registers.size() << endl;
+
+  cout << "REGISTER VALUES" << endl;
+  for (auto r : registers) {
+    cout << "\t" << r.first << " ";
+    cout << r.second << endl;
+  }
 
   cout << "Executing for real" << endl;
   state.setClock("self.clk", 0, 1);
-  state.setValue("self.resetn", BitVec(1, 0));
+  state.setValue("self.resetn", BitVec(1, 1));
 
   cout << "Executing core" << endl;
 
-  for (uint i = 0; i < 5; i++) {
+  for (uint i = 0; i < 50; i++) {
 
     state.runHalfCycle();
-    
-    cout << "\mem_valid = " << state.getBitVec("self.mem_valid") << endl;
+
+    cout << "\tmem_valid = " << state.getBitVec("self.mem_valid") << endl;
     cout << "\tmem_instr = " << state.getBitVec("self.mem_instr") << endl;
     cout << "\tmem_addr = " << state.getBitVec("self.mem_addr") << endl;
     cout << "\tmem_wdata = " << state.getBitVec("self.mem_wdata") << endl;
@@ -165,9 +174,17 @@ void simulateState(const std::string& fileName,
     cout << "\tmem_la_read = " << state.getBitVec("self.mem_la_read") << endl;
     cout << "\tmem_la_write = " << state.getBitVec("self.mem_la_write") << endl;
     cout << "\tmem_la_addr = " << state.getBitVec("self.mem_la_addr") << endl;
+    cout << "\tresetn = " << state.getBitVec("self.resetn") << endl;
 
     cout << "\teoi = " << state.getBitVec("self.eoi") << endl;
 
+    cout << "REGISTER VALUES" << endl;
+    auto registers = state.getCircStates().back().registers;
+    for (auto r : registers) {
+      cout << "\t" << r.first << " ";
+      cout << r.second << endl;
+    }
+    
     if ((state.getBitVec("self.mem_valid") == BitVec(1, 1)) &&
         (state.getBitVec("self.mem_ready") != BitVec(1, 1))) {
       cout << "\tMem valid, mem_addr = " << state.getBitVec("self.mem_addr") << endl;
@@ -178,6 +195,8 @@ void simulateState(const std::string& fileName,
       } else {
         state.setValue("self.mem_ready", BitVec(1, 0));
       }
+    } else {
+      state.setValue("self.mem_ready", BitVec(1, 0));
     }
     //state.execute();
   }
