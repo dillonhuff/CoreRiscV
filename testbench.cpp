@@ -188,7 +188,8 @@ void simulateState(const std::string& fileName,
 
   cout << "Executing core" << endl;
 
-  for (uint i = 0; i < 50; i++) {
+  uint nclks = 200;
+  for (uint i = 0; i < nclks; i++) {
 
     //state.runHalfCycle();
     state.execute();
