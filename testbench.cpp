@@ -107,6 +107,32 @@ void processTop(const std::string& fileName,
   deleteContext(c);
 }
 
+	// reg [31:0] memory [0:255];
+
+	// initial begin
+	// 	memory[0] = 32'h 
+	// 	memory[1] = 32'h 0000a023; //       sw      x0,0(x1)
+	// 	memory[2] = 32'h 0000a103; // loop: lw      x2,0(x1)
+	// 	memory[3] = 32'h 00110113; //       addi    x2,x2,1
+	// 	memory[4] = 32'h 0020a023; //       sw      x2,0(x1)
+	// 	memory[5] = 32'h ff5ff06f; //       j       <loop>
+	// end
+
+	// always @(posedge clk) begin
+	// 	mem_ready <= 0;
+	// 	if (mem_valid && !mem_ready) begin
+	// 		if (mem_addr < 1024) begin
+	// 			mem_ready <= 1;
+	// 			mem_rdata <= memory[mem_addr >> 2];
+	// 			if (mem_wstrb[0]) memory[mem_addr >> 2][ 7: 0] <= mem_wdata[ 7: 0];
+	// 			if (mem_wstrb[1]) memory[mem_addr >> 2][15: 8] <= mem_wdata[15: 8];
+	// 			if (mem_wstrb[2]) memory[mem_addr >> 2][23:16] <= mem_wdata[23:16];
+	// 			if (mem_wstrb[3]) memory[mem_addr >> 2][31:24] <= mem_wdata[31:24];
+	// 		end
+	// 		/* add memory-mapped IO here */
+	// 	end
+	// end
+
 void simulateState(const std::string& fileName,
                    const std::string& topModName) {
   Context* c = newContext();
@@ -122,6 +148,17 @@ void simulateState(const std::string& fileName,
 
   topMod = c->getGlobal()->getModule(topModName);
   c->setTop(topMod);
+
+  vector<BitVec> memory;
+  for (int i = 0; i < 256; i++) {
+    memory.push_back(BitVector(32, 0));
+  }
+  memory[0] = hexStringToBitVector("3fc00093"); //       li      x1,1020));
+  memory[1] = hexStringToBitVector("0000a023"); //       sw      x0,0(x1)
+  memory[2] = hexStringToBitVector("0000a103"); // loop: lw      x2,0(x1)
+  memory[3] = hexStringToBitVector("00110113"); //       addi    x2,x2,1
+  memory[4] = hexStringToBitVector("0020a023"); //       sw      x2,0(x1)
+  memory[5] = hexStringToBitVector("ff5ff06f"); //       j       <loop>
 
   SimulatorState state(topMod);
   state.setMainClock("self.clk");
@@ -193,6 +230,10 @@ void simulateState(const std::string& fileName,
       if (state.getBitVec("self.mem_addr").to_type<int>() < 1024) {
         cout << "\tSetting mem ready" << endl;
         state.setValue("self.mem_ready", BitVec(1, 1));
+
+        int mem_addr = state.getBitVec("self.mem_addr").to_type<int>() >> 2;
+        cout << "Loading " << mem_addr << endl;
+        state.setValue("self.mem_rdata", memory[mem_addr]);
       } else {
         state.setValue("self.mem_ready", BitVec(1, 0));
       }
@@ -207,8 +248,13 @@ void simulateState(const std::string& fileName,
 }
 
 int main() {
-  string fileName = "picorv32.json";//"__DOLLAR__paramod__DOLLAR__4d2dfdcc1db1a7362453fb449ccdda75bb1b39f9__BACKSLASH__picorv32.json";
-  string topMod = "picorv32"; //"__DOLLAR__paramod__DOLLAR__4d2dfdcc1db1a7362453fb449ccdda75bb1b39f9__BACKSLASH__picorv32";
+  string fileName = "picorv32.json";
+
+  //"__DOLLAR__paramod__DOLLAR__4d2dfdcc1db1a7362453fb449ccdda75bb1b39f9__BACKSLASH__picorv32.json";
+  string topMod = "picorv32";
+
+  //"__DOLLAR__paramod__DOLLAR__4d2dfdcc1db1a7362453fb449ccdda75bb1b39f9__BACKSLASH__picorv32";
   //processTop(fileName, topMod);
+
   simulateState("risc5Processed.json", topMod);
 }
