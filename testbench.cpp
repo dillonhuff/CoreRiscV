@@ -205,6 +205,9 @@ void simulateState(const std::string& fileName,
 
     cout << "\teoi = " << state.getBitVec("self.eoi") << endl;
 
+    cout << endl;
+    cout << "\tsum = " << memory[255] << endl;
+
     // cout << "REGISTER VALUES" << endl;
     // auto registers = state.getCircStates().back().registers;
     // for (auto r : registers) {
@@ -225,22 +228,42 @@ void simulateState(const std::string& fileName,
         state.setValue("self.mem_rdata", memory[mem_addr]);
 
         BitVector mem_wstrb = state.getBitVec("self.mem_wstrb");
+        BitVector mem_wdata = state.getBitVec("self.mem_wdata");
         
         assert(mem_wstrb.bitLength() == 4);
 
+        BitVec val = memory[mem_addr];        
+
         if (mem_wstrb.get(0)) {
-          //memory[mem_addr][ 7: 0] <= mem_wdata[ 7: 0];
-          BitVec mem = memory[mem_addr];
+
+          for (int i = 0; i < 8; i++) {
+            val.set(i, mem_wdata.get(i));
+          }
+
         }
         if (mem_wstrb.get(1)) {
-          //memory[mem_addr][15: 8] <= mem_wdata[15: 8];
+
+          for (int i = 8; i < 16; i++) {
+            val.set(i, mem_wdata.get(i));
+          }
+
         }
         if (mem_wstrb.get(2)) {
+          for (int i = 16; i < 24; i++) {
+            val.set(i, mem_wdata.get(i));
+          }
+
           //memory[mem_addr][23:16] <= mem_wdata[23:16];
         }
         if (mem_wstrb.get(3)) {
+          for (int i = 24; i < 32; i++) {
+            val.set(i, mem_wdata.get(i));
+          }
+
           //memory[mem_addr][31:24] <= mem_wdata[31:24];
         }
+
+        memory[mem_addr] = val;
         
       } else {
         state.setValue("self.mem_ready", BitVec(1, 0));
