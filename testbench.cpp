@@ -124,11 +124,14 @@ void processTop(const std::string& fileName,
 
 void simulateState(const std::string& fileName,
                    const std::string& topModName) {
+
   Context* c = newContext();
 
   CoreIRLoadLibrary_rtlil(c);
 
   Module* topMod = nullptr;
+
+  cout << "Loading " << topModName << " from file " << fileName << endl;
 
   if (!loadFromFile(c, fileName, &topMod)) {
     cout << "Could not Load from json!!" << endl;
@@ -138,6 +141,13 @@ void simulateState(const std::string& fileName,
   topMod = c->getGlobal()->getModule(topModName);
   c->setTop(topMod);
 
+  //c->runPasses({"cullgraph"});
+
+  // if (!saveToFile(c->getGlobal(), "risc5Only.json", topMod)) {
+  //   cout << "Could not save to json!!" << endl;
+  //   c->die();
+  // }
+  
   vector<BitVec> memory;
   for (int i = 0; i < 256; i++) {
     memory.push_back(BitVector(32, 0));
@@ -288,5 +298,5 @@ int main() {
   //"__DOLLAR__paramod__DOLLAR__4d2dfdcc1db1a7362453fb449ccdda75bb1b39f9__BACKSLASH__picorv32";
   //processTop(fileName, topMod);
 
-  simulateState("risc5Processed.json", topMod);
+  simulateState("risc5Only.json", topMod);
 }
