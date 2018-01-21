@@ -107,21 +107,6 @@ void processTop(const std::string& fileName,
   deleteContext(c);
 }
 
-	// always @(posedge clk) begin
-	// 	mem_ready <= 0;
-	// 	if (mem_valid && !mem_ready) begin
-	// 		if (mem_addr < 1024) begin
-	// 			mem_ready <= 1;
-	// 			mem_rdata <= memory[mem_addr >> 2];
-	// 			if (mem_wstrb[0]) memory[mem_addr >> 2][ 7: 0] <= mem_wdata[ 7: 0];
-	// 			if (mem_wstrb[1]) memory[mem_addr >> 2][15: 8] <= mem_wdata[15: 8];
-	// 			if (mem_wstrb[2]) memory[mem_addr >> 2][23:16] <= mem_wdata[23:16];
-	// 			if (mem_wstrb[3]) memory[mem_addr >> 2][31:24] <= mem_wdata[31:24];
-	// 		end
-	// 		/* add memory-mapped IO here */
-	// 	end
-	// end
-
 void simulateState(const std::string& fileName,
                    const std::string& topModName) {
 
@@ -204,20 +189,20 @@ void simulateState(const std::string& fileName,
     //state.runHalfCycle();
     state.execute();
 
-    cout << "\tmem_valid = " << state.getBitVec("self.mem_valid") << endl;
-    cout << "\tmem_instr = " << state.getBitVec("self.mem_instr") << endl;
-    cout << "\tmem_addr = " << state.getBitVec("self.mem_addr") << endl;
-    cout << "\tmem_wdata = " << state.getBitVec("self.mem_wdata") << endl;
-    cout << "\tmem_wstrb = " << state.getBitVec("self.mem_wstrb") << endl;
-    cout << "\tmem_la_read = " << state.getBitVec("self.mem_la_read") << endl;
-    cout << "\tmem_la_write = " << state.getBitVec("self.mem_la_write") << endl;
-    cout << "\tmem_la_addr = " << state.getBitVec("self.mem_la_addr") << endl;
-    cout << "\tresetn = " << state.getBitVec("self.resetn") << endl;
+    // cout << "\tmem_valid = " << state.getBitVec("self.mem_valid") << endl;
+    // cout << "\tmem_instr = " << state.getBitVec("self.mem_instr") << endl;
+    // cout << "\tmem_addr = " << state.getBitVec("self.mem_addr") << endl;
+    // cout << "\tmem_wdata = " << state.getBitVec("self.mem_wdata") << endl;
+    // cout << "\tmem_wstrb = " << state.getBitVec("self.mem_wstrb") << endl;
+    // cout << "\tmem_la_read = " << state.getBitVec("self.mem_la_read") << endl;
+    // cout << "\tmem_la_write = " << state.getBitVec("self.mem_la_write") << endl;
+    // cout << "\tmem_la_addr = " << state.getBitVec("self.mem_la_addr") << endl;
+    // cout << "\tresetn = " << state.getBitVec("self.resetn") << endl;
 
-    cout << "\teoi = " << state.getBitVec("self.eoi") << endl;
+    // cout << "\teoi = " << state.getBitVec("self.eoi") << endl;
 
-    cout << endl;
-    cout << "\tsum = " << memory[255] << endl;
+    // cout << endl;
+    // cout << "\tsum = " << memory[255] << endl;
 
     // cout << "REGISTER VALUES" << endl;
     // auto registers = state.getCircStates().back().registers;
@@ -228,14 +213,14 @@ void simulateState(const std::string& fileName,
     
     if ((state.getBitVec("self.mem_valid") == BitVec(1, 1)) &&
         (state.getBitVec("self.mem_ready") != BitVec(1, 1))) {
-      cout << "\tMem valid, mem_addr = " << state.getBitVec("self.mem_addr") << endl;
+      //cout << "\tMem valid, mem_addr = " << state.getBitVec("self.mem_addr") << endl;
 
       if (state.getBitVec("self.mem_addr").to_type<int>() < 1024) {
-        cout << "\tSetting mem ready" << endl;
+        //cout << "\tSetting mem ready" << endl;
         state.setValue("self.mem_ready", BitVec(1, 1));
 
         int mem_addr = state.getBitVec("self.mem_addr").to_type<int>() >> 2;
-        cout << "Loading " << mem_addr << endl;
+        //cout << "Loading " << mem_addr << endl;
         state.setValue("self.mem_rdata", memory[mem_addr]);
 
         BitVector mem_wstrb = state.getBitVec("self.mem_wstrb");
@@ -283,8 +268,29 @@ void simulateState(const std::string& fileName,
       state.setValue("self.mem_ready", BitVec(1, 0));
     }
 
+    if ((state.getBitVec("self.mem_valid") == BitVec(1, 1)) &&
+        (state.getBitVec("self.mem_ready") == BitVec(1, 1))) {
+      
+      if (state.getBitVec("self.mem_instr") == BitVec(1, 1)) {
+        //$display("ifetch 0x%08x: 0x%08x", mem_addr, mem_rdata);
+        cout << "ifetch " << state.getBitVec("self.mem_addr") << ": " <<
+          state.getBitVec("self.mem_rdata") << endl;
+      } else if (state.getBitVec("self.mem_wstrb") != BitVec(4, 0)) {
+        cout << "write  " << state.getBitVec("self.mem_addr") << ": " <<
+          state.getBitVec("self.mem_wdata") << " (wstrb=" <<
+          state.getBitVec("self.mem_wstrb") << ")" << endl;
+
+        //$displ"write  0x%08x: 0x%08x (wstrb=%b)", mem_addr, mem_wdata, mem_wstrb);
+      } else {
+        //$display("read   0x%08x: 0x%08x", mem_addr, mem_rdata);
+        cout << "read   " << state.getBitVec("self.mem_addr") << ": " <<
+          state.getBitVec("self.mem_rdata") << endl;
+      }
+
+    }
   }
-  
+    
+    
   deleteContext(c);
 
 }
