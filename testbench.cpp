@@ -150,11 +150,11 @@ void simulateState(const std::string& fileName,
 
   cout << "# of assigned registers = " << registers.size() << endl;
 
-  cout << "REGISTER VALUES" << endl;
-  for (auto r : registers) {
-    cout << "\t" << r.first << " ";
-    cout << r.second << endl;
-  }
+  // cout << "REGISTER VALUES" << endl;
+  // for (auto r : registers) {
+  //   cout << "\t" << r.first << " ";
+  //   cout << r.second << endl;
+  // }
 
   cout << "Executing for real" << endl;
   state.setClock("self.clk", 0, 1);
@@ -164,7 +164,8 @@ void simulateState(const std::string& fileName,
 
   for (uint i = 0; i < 50; i++) {
 
-    state.runHalfCycle();
+    //state.runHalfCycle();
+    state.execute();
 
     cout << "\tmem_valid = " << state.getBitVec("self.mem_valid") << endl;
     cout << "\tmem_instr = " << state.getBitVec("self.mem_instr") << endl;
@@ -178,12 +179,12 @@ void simulateState(const std::string& fileName,
 
     cout << "\teoi = " << state.getBitVec("self.eoi") << endl;
 
-    cout << "REGISTER VALUES" << endl;
-    auto registers = state.getCircStates().back().registers;
-    for (auto r : registers) {
-      cout << "\t" << r.first << " ";
-      cout << r.second << endl;
-    }
+    // cout << "REGISTER VALUES" << endl;
+    // auto registers = state.getCircStates().back().registers;
+    // for (auto r : registers) {
+    //   cout << "\t" << r.first << " ";
+    //   cout << r.second << endl;
+    // }
     
     if ((state.getBitVec("self.mem_valid") == BitVec(1, 1)) &&
         (state.getBitVec("self.mem_ready") != BitVec(1, 1))) {
