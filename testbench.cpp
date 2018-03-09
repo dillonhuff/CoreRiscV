@@ -126,18 +126,11 @@ void simulateState(const std::string& fileName,
   topMod = c->getGlobal()->getModule(topModName);
   c->setTop(topMod);
 
-  //c->runPasses({"cullgraph"});
-
-  // if (!saveToFile(c->getGlobal(), "risc5Only.json", topMod)) {
-  //   cout << "Could not save to json!!" << endl;
-  //   c->die();
-  // }
-  
   vector<BitVec> memory;
   for (int i = 0; i < 256; i++) {
     memory.push_back(BitVector(32, 0));
   }
-  memory[0] = hexStringToBitVector("3fc00093"); //       li      x1,1020));
+  memory[0] = hexStringToBitVector("3fc00093"); //       li      x1,1020
   memory[1] = hexStringToBitVector("0000a023"); //       sw      x0,0(x1)
   memory[2] = hexStringToBitVector("0000a103"); // loop: lw      x2,0(x1)
   memory[3] = hexStringToBitVector("00110113"); //       addi    x2,x2,1
@@ -166,16 +159,6 @@ void simulateState(const std::string& fileName,
   cout << "Initializing" << endl;
 
   state.execute();
-
-  auto registers = state.getCircStates().back().registers;
-
-  cout << "# of assigned registers = " << registers.size() << endl;
-
-  // cout << "REGISTER VALUES" << endl;
-  // for (auto r : registers) {
-  //   cout << "\t" << r.first << " ";
-  //   cout << r.second << endl;
-  // }
 
   cout << "Executing for real" << endl;
   state.setClock("self.clk", 0, 1);
@@ -230,33 +213,29 @@ void simulateState(const std::string& fileName,
 
         BitVec val = memory[mem_addr];        
 
-        if (mem_wstrb.get(0)) {
+        if (mem_wstrb.get(0).is_binary() && mem_wstrb.get(0).binary_value()) {
 
           for (int i = 0; i < 8; i++) {
             val.set(i, mem_wdata.get(i));
           }
 
         }
-        if (mem_wstrb.get(1)) {
+        if (mem_wstrb.get(1).is_binary() && mem_wstrb.get(1).binary_value()) {
 
           for (int i = 8; i < 16; i++) {
             val.set(i, mem_wdata.get(i));
           }
 
         }
-        if (mem_wstrb.get(2)) {
+        if (mem_wstrb.get(2).is_binary() && mem_wstrb.get(2).binary_value()) {
           for (int i = 16; i < 24; i++) {
             val.set(i, mem_wdata.get(i));
           }
-
-          //memory[mem_addr][23:16] <= mem_wdata[23:16];
         }
-        if (mem_wstrb.get(3)) {
+        if (mem_wstrb.get(3).is_binary() && mem_wstrb.get(3).binary_value()) {
           for (int i = 24; i < 32; i++) {
             val.set(i, mem_wdata.get(i));
           }
-
-          //memory[mem_addr][31:24] <= mem_wdata[31:24];
         }
 
         memory[mem_addr] = val;
@@ -279,21 +258,16 @@ void simulateState(const std::string& fileName,
       if (state.getBitVec("self.mem_instr") == BitVec(1, 1)) {
 
         printf( "ifetch 0x%08x: 0x%08x\n", mem_addr.to_type<int>(), mem_rdata.to_type<int>());
-        //cout << "ifetch " << std::setw(sizeof(int)*2) << std::hex << showbase << internal << setfill('0') << mem_addr.to_type<int>() << ": " <<
-        //mem_rdata.to_type<int>() << endl;
+
       } else if (state.getBitVec("self.mem_wstrb") != BitVec(4, 0)) {
 
         printf( "write  0x%08x: 0x%08x (wstrb=", mem_addr.to_type<int>(), mem_wdata.to_type<int>());
         cout << mem_wstrb << ")\n";
-        // cout << "write  " << std::hex << mem_addr.to_type<int>() << ": " <<
-        //   mem_wdata.to_type<int>() << " (wstrb=" <<
-        //   mem_wstrb << ")" << endl;
 
       } else {
 
         printf( "read   0x%08x: 0x%08x\n", mem_addr.to_type<int>(), mem_rdata.to_type<int>());
-        // cout << "read   " << std::hex << mem_addr.to_type<int>() << ": " <<
-        //   mem_rdata.to_type<int>() << endl;
+
       }
 
     }
